@@ -13,4 +13,4 @@ find_package(httplib REQUIRED)
 find_package(nlohmann_json REQUIRED)
 
 # sources
-include(src/CMakeLists.txt)
+add_subdirectory(src)
