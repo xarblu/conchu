@@ -12,8 +12,16 @@ CommandLineInterface::CommandLineInterface(int argc, char *argv[]) {
         if (arg == "-h" || arg == "--help") {
             usage();
             std::exit(0);
+
+        } else if (arg == "-e" || arg == "--engine-host") {
+            if (i + 1 < argc) {
+                m_container_engine_host = std::string{argv[++i]};
+            } else {
+                std::cerr << "Missing argument for " << arg << std::endl;
+            }
+
         } else {
-            std::cout << "Bad argument: " << arg << "\n\n";
+            std::cerr << "Bad argument: " << arg << "\n\n";
             usage();
             std::exit(1);
         }
@@ -25,9 +33,11 @@ void CommandLineInterface::usage() const {
               << "Usage: conchu [-h|--help] MODE\n"
               << "\n"
               << "Options:\n"
-              << "  -h|--help  Print help and exit\n"
+              << "  -h|--help         Print help and exit\n"
+              << "  -e|--engine-host  Container engine host to use\n"
+              << "                    Should include scheme, e.g. unix:///run/podman/podman.sock\n"
               << "\n"
               << "Positional arguments:\n"
-              << "  MODE       Mode to operate in:\n"
-              << "             oneshot - Check all containers once, print potential updates, then exit\n";
+              << "  MODE              Mode to operate in:\n"
+              << "                    oneshot - Check all containers once, print potential updates, then exit\n";
 }

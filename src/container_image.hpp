@@ -24,9 +24,14 @@ public:
      */
     bool isValid() const;
 
+    /**
+     * Convert to human readable string
+     */
+    std::string toString() const;
+
 private:
     /**
      * Print a parse error
      */
-    void printParseError(std::string_view image) const;
+    void printParseError(std::string_view image, std::string_view msg) const;
 };

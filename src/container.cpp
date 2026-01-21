@@ -1,0 +1,73 @@
+#include "container.hpp"
+#include "container_image.hpp"
+
+#include <nlohmann/json.hpp>
+
+#include <iostream>
+#include <ostream>
+#include <format>
+
+
+Container::Container(nlohmann::json &json) {
+    if (!json.is_object()) {
+        printParseError(json, "Can't parse Container from non-object JSON");
+        return;
+    }
+
+    if (json.contains("Name")) {
+        auto name = json["Name"];
+        if (!name.is_string()) {
+            printParseError(json, ".Name should be a string");
+            return;
+        }
+        m_name = name.get<std::string>();
+    } else {
+        printParseError(json, ".Name field missing");
+        return;
+    }
+
+    if (json.contains("Image")) {
+        auto image = json["Image"];
+        if (!image.is_string()) {
+            printParseError(json, ".Image should be a string");
+            return;
+        }
+        m_image = ContainerImage{image.get<std::string>()};
+    } else {
+        printParseError(json, ".Image field missing");
+        return;
+    }
+
+    if (json.contains("Labels")) {
+        auto labels = json["Labels"];
+        if (!labels.is_object()) {
+            printParseError(json, ".Labels should be a object");
+            return;
+        }
+        m_labels = labels.get<std::unordered_map<std::string, std::string>>();
+    } else {
+        printParseError(json, ".Labels field missing");
+        return;
+    }
+}
+
+void Container::printParseError(nlohmann::json &json, std::string_view msg) const {
+    std::cerr << "Error parsing Container from JSON:\n"
+              << json.dump(2)
+              << "\n" << msg << std::endl;
+}
+
+std::string Container::toString() const {
+    std::string labels{};
+    for (const auto &[key, value] : m_labels) {
+        if (!labels.empty()) {
+            labels += " ";
+        }
+        labels += (std::format("{}={}", key, value));
+    }
+
+    return std::format("name={} image=({}) labels=({})",
+                       m_name.value_or("Unknown"),
+                       m_image.transform([](ContainerImage image) {return image.toString();}).value_or("Unknown"),
+                       labels);
+}

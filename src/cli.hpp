@@ -1,7 +1,12 @@
 #pragma once
 
+#include <string>
+#include <optional>
+
+
 class CommandLineInterface {
 private:
+    std::optional<std::string> m_container_engine_host;
     
 public:
     /**
@@ -15,4 +20,9 @@ public:
      * Print usage message
      */
     void usage() const;
+
+    /**
+     * Getters
+     */
+    std::optional<std::string> containerEngineHost() const { return m_container_engine_host; }
 };
