@@ -3,8 +3,10 @@
 #include "container_engine.hpp"
 #include "container_image.hpp"
 #include "docker_hub_registry.hpp"
+#include "tag_filter.hpp"
 
 #include <iostream>
+#include <regex>
 
 int main(int argc, char *argv[]) {
     CommandLineInterface cli{argc, argv};
@@ -33,9 +35,16 @@ int main(int argc, char *argv[]) {
             continue;
         }
 
-        for (const auto &tag : registry->fetchTags(image)) {
-            std::cout << "Found tag: " << tag << std::endl;
+        auto tags = registry->fetchTags(image);
+
+        TagFilter tag_filter{tags, std::regex{"\\d+\\.\\d+\\.\\d+"}};
+        auto latest_tag = tag_filter.latest();
+        if (latest_tag.has_value()) {
+            std::cout << "Latest tag: " << latest_tag.value().raw() << std::endl;
+        } else {
+            std::cout << "Could not find latest tag - No tags?" << std::endl;
         }
+
     }
 
     return 0;

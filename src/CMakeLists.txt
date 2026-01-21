@@ -9,6 +9,8 @@ target_sources(conchu
       container_image.cpp
       container_engine.cpp
       container.cpp
+      tag.cpp
+      tag_filter.cpp
 )
 
 target_include_directories(conchu
