@@ -20,6 +20,14 @@ public:
     explicit ContainerImage(std::string_view image);
 
     /**
+     * Getters
+     */
+    std::optional<std::string> registry() const {return m_registry;}
+    std::optional<std::string> cnamespace() const {return m_namespace;}
+    std::optional<std::string> repository() const {return m_repository;}
+    std::optional<std::string> tag() const {return m_tag;}
+
+    /**
      * Check if parsed image is valid
      */
     bool isValid() const;

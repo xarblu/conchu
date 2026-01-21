@@ -6,16 +6,22 @@
 #include <string_view>
 #include <unordered_set>
 
-class DockerHubRegistry : AbstractRegistry {
+class DockerHubRegistry : public AbstractRegistry {
 public:
     /**
-     * Whether this registry matches the image source string
-     * @param source  Image source e.g. docker.io/library/ubuntu:24.04
+     * Explicit constructor
      */
-    virtual bool matchSource(std::string_view source) const override;
+    explicit DockerHubRegistry()
+        : AbstractRegistry{ "https://hub.docker.com" }
+    {}
 
     /**
-     * Fetch tags for source from registry
+     * Whether this registry matches the container image registry
      */
-    virtual std::unordered_set<std::string> fetchTags(std::string_view source) override;
+    virtual bool matchContainerImage(const ContainerImage &image) const override;
+
+    /**
+     * Fetch tags for container image from registry
+     */
+    virtual std::unordered_set<std::string> fetchTags(const ContainerImage &image) override;
 };

@@ -22,6 +22,13 @@ public:
     explicit Container(nlohmann::json &json);
 
     /**
+     * Getters
+     */
+    std::optional<std::string> name() const {return m_name;}
+    std::optional<ContainerImage> image() const {return m_image;}
+    std::unordered_map<std::string, std::string> labels() const {return m_labels;}
+
+    /**
      * Convert Container to human readable string
      */
     std::string toString() const;
