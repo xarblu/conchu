@@ -6,7 +6,8 @@
 
 class CommandLineInterface {
 private:
-    std::optional<std::string> m_container_engine_host;
+    std::optional<std::string> m_config_file{};
+    std::optional<std::string> m_container_engine_host{};
     
 public:
     /**
@@ -24,5 +25,6 @@ public:
     /**
      * Getters
      */
-    std::optional<std::string> containerEngineHost() const { return m_container_engine_host; }
+    const std::optional<std::string>& configFile() const { return m_config_file; }
+    const std::optional<std::string>& containerEngineHost() const { return m_container_engine_host; }
 };

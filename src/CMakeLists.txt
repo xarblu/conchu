@@ -2,13 +2,14 @@ add_executable(conchu)
 
 target_sources(conchu
     PRIVATE
-      main.cpp
-      cli.cpp
       abstract_registry.cpp
-      docker_hub_registry.cpp
-      container_image.cpp
-      container_engine.cpp
+      cli.cpp
+      config.cpp
       container.cpp
+      container_engine.cpp
+      container_image.cpp
+      docker_hub_registry.cpp
+      main.cpp
       tag.cpp
       tag_filter.cpp
 )

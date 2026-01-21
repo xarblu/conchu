@@ -4,14 +4,17 @@
 #include "container_image.hpp"
 #include "docker_hub_registry.hpp"
 #include "tag_filter.hpp"
+#include "config.hpp"
 
 #include <iostream>
 #include <regex>
 
 int main(int argc, char *argv[]) {
     CommandLineInterface cli{argc, argv};
+    Config config{cli.configFile().value_or("./conchu.yaml")};
+    config.mergeCLI(cli);
 
-    ContainerEngine engine{cli.containerEngineHost().value_or("unix:///run/user/1000/podman/podman.sock")};
+    ContainerEngine engine{config.containerEngineHost()};
     DockerHubRegistry docker_hub{};
 
     for (const auto &container : engine.getContainers()) {
