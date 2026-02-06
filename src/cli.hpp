@@ -1,13 +1,19 @@
 #pragma once
 
+#include "enums.hpp"
+
 #include <string>
 #include <optional>
 
 
 class CommandLineInterface {
 private:
-    std::optional<std::string> m_config_file{};
-    std::optional<std::string> m_container_engine_host{};
+    // CLI only
+    std::optional<std::string> m_configFile{};
+    std::optional<Mode> m_mode{};
+
+    // overrides for config file
+    std::optional<std::string> m_containerEngineHost{};
     
 public:
     /**
@@ -25,6 +31,6 @@ public:
     /**
      * Getters
      */
-    const std::optional<std::string>& configFile() const { return m_config_file; }
-    const std::optional<std::string>& containerEngineHost() const { return m_container_engine_host; }
+    const std::optional<std::string>& configFile() const { return m_configFile; }
+    const std::optional<std::string>& containerEngineHost() const { return m_containerEngineHost; }
 };

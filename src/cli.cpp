@@ -12,19 +12,55 @@ CommandLineInterface::CommandLineInterface(int argc, char *argv[]) {
         if (arg == "-h" || arg == "--help") {
             usage();
             std::exit(0);
-
-        } else if (arg == "-e" || arg == "--engine-host") {
-            if (i + 1 < argc) {
-                m_container_engine_host = std::string{argv[++i]};
-            } else {
-                std::cerr << "Missing argument for " << arg << std::endl;
-            }
-
-        } else {
-            std::cerr << "Bad argument: " << arg << "\n\n";
-            usage();
-            std::exit(1);
         }
+
+        if (arg == "-c" || arg == "--config") {
+            if (i + 1 < argc) {
+                m_configFile = std::string{argv[++i]};
+            } else {
+                std::cerr << "Missing value for: " << arg << "\n\n";
+                usage();
+                std::exit(1);
+            }
+            continue;
+        }
+
+        if (arg == "-e" || arg == "--engine-host") {
+            if (i + 1 < argc) {
+                m_containerEngineHost = std::string{argv[++i]};
+            } else {
+                std::cerr << "Missing value for: " << arg << "\n\n";
+                usage();
+                std::exit(1);
+            }
+            continue;
+        }
+
+        // positional argument
+        if (!arg.starts_with("-")) {
+            if (!m_mode.has_value()) {
+                if (arg == "oneshot") {
+                    m_mode = Mode::Oneshot;
+                } else if (arg == "daemon") {
+                    m_mode = Mode::Daemon;
+                } else {
+                    std::cerr << "Bad value for MODE: " << arg << "\n\n";
+                    usage();
+                    std::exit(1);
+                }
+            }
+            continue;
+        }
+
+        std::cerr << "Unknown argument: " << arg << "\n\n";
+        usage();
+        std::exit(1);
+    }
+
+    if (!m_mode.has_value()) {
+        std::cerr << "Missing required arg: MODE\n\n";
+        usage();
+        std::exit(1);
     }
 }
 
@@ -40,5 +76,6 @@ void CommandLineInterface::usage() const {
               << "\n"
               << "Positional arguments:\n"
               << "  MODE              Mode to operate in:\n"
-              << "                    oneshot - Check all containers once, print potential updates, then exit\n";
+              << "                    oneshot - Check all containers once, print potential updates, then exit\n"
+              << "                    daemon  - Continuously check for container updates in the configured interval\n";
 }

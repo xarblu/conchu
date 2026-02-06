@@ -9,6 +9,6 @@ Config::Config(std::string_view file) {
 
 void Config::mergeCLI(const CommandLineInterface &cli) {
     if (cli.containerEngineHost().has_value()) {
-        m_container_engine_host = cli.containerEngineHost().value();
+        m_containerEngineHost = cli.containerEngineHost().value();
     }
 }
