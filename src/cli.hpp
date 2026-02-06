@@ -34,6 +34,7 @@ public:
      * Getters
      */
     const std::optional<std::string>& configFile() const { return m_configFile; }
+    const Mode mode() const { return m_mode.value(); } // assured at parse time
     const std::optional<std::string>& containerEngineHost() const { return m_containerEngineHost; }
     const std::optional<std::chrono::seconds>& checkInterval() const {return m_checkInterval; }
 };

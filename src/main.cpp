@@ -1,54 +1,20 @@
-#include "abstract_registry.hpp"
 #include "cli.hpp"
-#include "container_engine.hpp"
-#include "container_image.hpp"
-#include "docker_hub_registry.hpp"
-#include "tag_filter.hpp"
 #include "config.hpp"
+#include "enums.hpp"
+#include "mode_oneshot.hpp"
 
 #include <iostream>
-#include <regex>
 
 int main(int argc, char *argv[]) {
     CommandLineInterface cli{argc, argv};
     Config config{cli.configFile().value_or("./conchu.yaml")};
     config.mergeCLI(cli);
 
-    ContainerEngine engine{config.containerEngineHost()};
-    DockerHubRegistry docker_hub{};
-
-    for (const auto &container : engine.getContainers()) {
-        std::cout << "Found Container: " << container.toString() << std::endl;
-
-        if (!container.image().has_value()) {
-            std::cout << "Skipping due to empty image attribute" << std::endl;
-            continue;
-        }
-
-        ContainerImage image{container.image().value()};
-        AbstractRegistry* registry{nullptr};
-
-        if (docker_hub.matchContainerImage(image)) {
-            std::cout << "Matched registry Docker Hub" << std::endl;
-            registry = &docker_hub;
-        }
-
-        if (!registry){
-            std::cout << "No registry matched" << std::endl;
-            continue;
-        }
-
-        auto tags = registry->fetchTags(image);
-
-        TagFilter tag_filter{tags, std::regex{"\\d+\\.\\d+\\.\\d+"}};
-        auto latest_tag = tag_filter.latest();
-        if (latest_tag.has_value()) {
-            std::cout << "Latest tag: " << latest_tag.value().raw() << std::endl;
-        } else {
-            std::cout << "Could not find latest tag - No tags?" << std::endl;
-        }
-
+    switch (cli.mode()) {
+        case Mode::Oneshot:
+            return oneshot_init(config);
+        case Mode::Daemon:
+            std::cerr << "Not implemented\n";
+            return 1;
     }
-
-    return 0;
 }

@@ -10,6 +10,7 @@ target_sources(conchu
       container_image.cpp
       docker_hub_registry.cpp
       main.cpp
+      mode_oneshot.cpp
       tag.cpp
       tag_filter.cpp
 )
