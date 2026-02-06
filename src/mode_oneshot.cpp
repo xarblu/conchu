@@ -7,9 +7,10 @@
 #include "tag_filter.hpp"
 
 #include <iostream>
+#include <memory>
 
-int oneshot_init(Config &config) {
-    ContainerEngine engine{config.containerEngineHost()};
+int oneshot_init(std::shared_ptr<Config> config) {
+    ContainerEngine engine{config->containerEngineHost()};
     DockerHubRegistry docker_hub{};
 
     auto containers = engine.getContainers();
