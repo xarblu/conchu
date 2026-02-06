@@ -11,4 +11,8 @@ void Config::mergeCLI(const CommandLineInterface &cli) {
     if (cli.containerEngineHost().has_value()) {
         m_containerEngineHost = cli.containerEngineHost().value();
     }
+
+    if (cli.checkInterval().has_value()) {
+        m_checkInterval = cli.checkInterval().value();
+    }
 }

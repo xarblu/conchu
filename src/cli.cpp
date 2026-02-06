@@ -3,6 +3,8 @@
 #include <string_view>
 #include <iostream>
 #include <cstdlib>
+#include <string>
+#include <chrono>
 
 
 CommandLineInterface::CommandLineInterface(int argc, char *argv[]) {
@@ -28,6 +30,33 @@ CommandLineInterface::CommandLineInterface(int argc, char *argv[]) {
         if (arg == "-e" || arg == "--engine-host") {
             if (i + 1 < argc) {
                 m_containerEngineHost = std::string{argv[++i]};
+            } else {
+                std::cerr << "Missing value for: " << arg << "\n\n";
+                usage();
+                std::exit(1);
+            }
+            continue;
+        }
+
+        if (arg == "-i" || arg == "--check-interval") {
+            if (i + 1 < argc) {
+                int secs;
+                try {
+                    secs = std::stoi(argv[++i]);
+                } catch (std::invalid_argument const& _) {
+                    std::cout << "Not a valid integer value for arg " << arg << ": " << argv[i] << "\n";
+                    std::exit(1);
+                } catch (std::out_of_range const& _) {
+                    std::cout << "Integer out of range for arg " << arg << ": " << argv[i] << "\n";
+                    std::exit(1);
+                }
+
+                if (secs < 0) {
+                    std::cout << "Integer must be positive for arg " << arg << ": " << argv[i] << "\n";
+                    std::exit(1);
+                }
+
+                m_checkInterval = std::chrono::seconds{secs};
             } else {
                 std::cerr << "Missing value for: " << arg << "\n\n";
                 usage();
@@ -69,13 +98,14 @@ void CommandLineInterface::usage() const {
               << "Usage: conchu [-h|--help] MODE\n"
               << "\n"
               << "Options:\n"
-              << "  -c|--config       Config file (default ./conchu.yaml)\n"
-              << "  -e|--engine-host  Container engine host to use\n"
-              << "                    Should include scheme, e.g. unix:///run/podman/podman.sock\n"
-              << "  -h|--help         Print help and exit\n"
+              << "  -c|--config         Config file (default ./conchu.yaml)\n"
+              << "  -e|--engine-host    Container engine host to use\n"
+              << "                      Should include scheme, e.g. unix:///run/podman/podman.sock\n"
+              << "  -i|--check-interval Check interval in seconds (daemon mode)\n"
+              << "  -h|--help           Print help and exit\n"
               << "\n"
               << "Positional arguments:\n"
-              << "  MODE              Mode to operate in:\n"
-              << "                    oneshot - Check all containers once, print potential updates, then exit\n"
-              << "                    daemon  - Continuously check for container updates in the configured interval\n";
+              << "  MODE                Mode to operate in:\n"
+              << "                      oneshot - Check all containers once, print potential updates, then exit\n"
+              << "                      daemon  - Continuously check for container updates in the configured interval\n";
 }
