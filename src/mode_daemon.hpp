@@ -45,4 +45,9 @@ private:
      * The container watcher thread entry point
      */
     void watcherThread(std::stop_token stoken);
+
+    /**
+     * Trigger a watch
+     */
+    void triggerWatchEvent();
 };
