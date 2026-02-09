@@ -1,19 +1,20 @@
 #include "mode_daemon.hpp"
 
 #include "abstract_registry.hpp"
+#include "api.hpp"
 #include "config.hpp"
 #include "container_engine.hpp"
 #include "docker_hub_registry.hpp"
 #include "tag_filter.hpp"
 
+#include <condition_variable>
+#include <format>
+#include <functional>
 #include <iostream>
 #include <memory>
 #include <mutex>
-#include <thread>
-#include <functional>
 #include <stop_token>
-#include <format>
-#include <condition_variable>
+#include <thread>
 
 int daemon_init(std::shared_ptr<Config> config) {
     Daemon daemon{config};
@@ -24,8 +25,11 @@ int daemon_init(std::shared_ptr<Config> config) {
 
 void Daemon::start() {
     m_watcherThread = std::jthread{std::bind(&Daemon::watcherThread, this, std::placeholders::_1)};
+    m_apiThread = std::jthread{std::bind(&Daemon::apiThread, this, std::placeholders::_1)};
 
+    // TODO: proper thread pool with parallel cancellation
     m_watcherThread.join();
+    m_apiThread.join();
 }
 
 void Daemon::watcherThread(std::stop_token stoken) {
@@ -53,6 +57,14 @@ void Daemon::watcherThread(std::stop_token stoken) {
         cond.notify_one();
         std::this_thread::sleep_for(m_config->checkInterval());
     }
+}
+
+void Daemon::apiThread(std::stop_token stoken) {
+    std::cout << std::format("HTTP API thread started (Serving from: http://{}:{})\n", m_config->listenAddr(), m_config->listenPort());
+
+    Api api{m_config};
+    std::stop_callback cb(stoken, [&api]{api.stop();});
+    api.start();
 }
 
 void Daemon::triggerWatchEvent() {

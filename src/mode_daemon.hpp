@@ -23,6 +23,7 @@ private:
      * Thread trackers
      */
     std::jthread m_watcherThread;
+    std::jthread m_apiThread;
 
     /**
      * Vars for watcherThread
@@ -45,6 +46,11 @@ private:
      * The container watcher thread entry point
      */
     void watcherThread(std::stop_token stoken);
+
+    /**
+     * The HTTP API thread entry point
+     */
+    void apiThread(std::stop_token stoken);
 
     /**
      * Trigger a watch

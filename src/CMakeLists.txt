@@ -3,6 +3,7 @@ add_executable(conchu)
 target_sources(conchu
     PRIVATE
       abstract_registry.cpp
+      api.cpp
       cli.cpp
       config.cpp
       container.cpp
