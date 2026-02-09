@@ -10,7 +10,7 @@ class Config;
 class ContainerEngine;
 class DockerHubRegistry;
 
-int daemon_init(std::shared_ptr<Config> config);
+int daemon_init(const std::shared_ptr<Config> config);
 
 class Daemon {
 private:
@@ -41,6 +41,11 @@ public:
      */
     void start();
 
+    /**
+     * Shutdown daemon
+     */
+    void shutdown();
+
 private:
     /**
      * The container watcher thread entry point
@@ -51,9 +56,4 @@ private:
      * The HTTP API thread entry point
      */
     void apiThread(std::stop_token stoken);
-
-    /**
-     * Trigger a watch
-     */
-    void triggerWatchEvent();
 };
