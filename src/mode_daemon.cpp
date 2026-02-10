@@ -80,7 +80,6 @@ void Daemon::watcherThread(std::stop_token stoken) {
         auto containers = engine.getContainers();
         if (containers.empty()) {
             std::cout << "No containers found\n";
-            continue;
         }
 
         for (const auto &container : containers) {
@@ -121,10 +120,10 @@ void Daemon::watcherThread(std::stop_token stoken) {
                     // erase existing container
                     // ensures we only ever have the latest one
                     bool present{false};
-                    for (auto it = m_containers.begin(); it != m_containers.end(); it++) {
-                        if (it->first == entry.first) {
+                    for (int idx{0}; idx < m_containers.size(); idx++) {
+                        if (m_containers[idx].first == entry.first) {
                             present = true;
-                            m_containers.erase(it);
+                            m_containers.erase(m_containers.begin() + idx--);
                             break;
                         }
                     }
@@ -145,17 +144,17 @@ void Daemon::watcherThread(std::stop_token stoken) {
         // cleanup non-present containers
         {
             std::lock_guard lock{m_containers_mtx};
-            for (auto it = m_containers.begin(); it != m_containers.end(); it++) {
+            for (int idx{0}; idx < m_containers.size(); idx++) {
                 bool present{false};
                 for (auto& container : containers) {
-                    if (it->first == container) {
+                    if (m_containers[idx].first == container) {
                         present = true;
                         break;
                     }
                 }
                 if (!present) {
-                    std::cout << std::format("Removing container: {}\n", it->first.toString());
-                    m_containers.erase(it);
+                    std::cout << std::format("Removing container: {}\n", m_containers[idx].first.toString());
+                    m_containers.erase(m_containers.begin() + idx--);
                 }
             }
         }
