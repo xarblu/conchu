@@ -14,15 +14,26 @@ Container::Container(nlohmann::json &json) {
         return;
     }
 
-    if (json.contains("Name")) {
-        auto name = json["Name"];
-        if (!name.is_string()) {
-            printParseError(json, ".Name should be a string");
+    if (json.contains("Names")) {
+        auto names_json = json["Names"];
+        if (!names_json.is_array()) {
+            printParseError(json, ".Names should be an array");
             return;
         }
-        m_name = name.get<std::string>();
+        auto names = names_json.get<std::vector<std::string>>();
+        if (names.empty()) {
+            printParseError(json, ".Names array is empty");
+            return;
+        }
+        // Podman adds a / in front of names
+        auto name = names[0];
+        if (name.starts_with("/")) {
+            m_name = name.substr(1);
+        } else {
+            m_name = name;
+        }
     } else {
-        printParseError(json, ".Name field missing");
+        printParseError(json, ".Names field missing");
         return;
     }
 
