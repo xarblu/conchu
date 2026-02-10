@@ -35,12 +35,28 @@ void Api::handleContainersGET(const httplib::Request &, httplib::Response &res) 
     nlohmann::json json = nlohmann::json::array();
     int idx{0};
 
-    for (const auto&[container, tag] : m_daemon->getContainers()) {
+    for (const auto&[container, latest_tag] : m_daemon->getContainers()) {
         auto container_json = container.toJSON();
 
         // TODO: Inject into Container in Daemon?
         //       That way container.toJSON() can handle it
-        container_json["result"]["tag"] = tag.raw();
+        container_json["result"]["tag"] = latest_tag.raw();
+
+        if (auto image = container.image(); image.has_value()) {
+            if (auto image_tag = image.value().tag(); image_tag.has_value()) {
+                if (image_tag != latest_tag.raw()) {
+                    container_json["updateAvailable"] = true;
+                } else {
+                    container_json["updateAvailable"] = false;
+                }
+            } else {
+                // assume true if Container doesn't have a tag
+                container_json["updateAvailable"] = true;
+            }
+        } else {
+            // assume true if Container doesn't have a tag
+            container_json["updateAvailable"] = true;
+        }
 
         json[idx++] = container_json;
     }
