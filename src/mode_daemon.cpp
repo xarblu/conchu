@@ -120,11 +120,19 @@ void Daemon::watcherThread(std::stop_token stoken) {
 
                     // erase existing container
                     // ensures we only ever have the latest one
+                    bool present{false};
                     for (auto it = m_containers.begin(); it != m_containers.end(); it++) {
                         if (it->first == entry.first) {
+                            present = true;
                             m_containers.erase(it);
                             break;
                         }
+                    }
+
+                    if (present) {
+                        std::cout << std::format("Updating container: {}\n", entry.first.toString());
+                    } else {
+                        std::cout << std::format("Adding container: {}\n", entry.first.toString());
                     }
 
                     m_containers.push_back(std::move(entry));
@@ -146,7 +154,7 @@ void Daemon::watcherThread(std::stop_token stoken) {
                     }
                 }
                 if (!present) {
-                    std::cout << std::format("Removed container: {}\n", it->first.toString());
+                    std::cout << std::format("Removing container: {}\n", it->first.toString());
                     m_containers.erase(it);
                 }
             }
