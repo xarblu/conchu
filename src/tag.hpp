@@ -20,6 +20,11 @@ public:
     explicit Tag(std::string_view tag);
 
     /**
+     * Compare this Tag to other
+     */
+    bool operator==(const Tag& other) const;
+
+    /**
      * Getters
      */
     const std::string& raw() const {return m_raw;};

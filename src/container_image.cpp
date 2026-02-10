@@ -30,6 +30,13 @@ ContainerImage::ContainerImage(std::string_view image) {
     m_tag = repo_parts[1];
 }
 
+bool ContainerImage::operator==(const ContainerImage& other) const {
+    return m_registry == other.registry() &&
+           m_namespace == other.cnamespace() &&
+           m_repository == other.repository() &&
+           m_tag == other.tag();
+}
+
 void ContainerImage::printParseError(std::string_view image, std::string_view msg) const {
     std::cerr << "Failed to parse image source "
               << std::quoted(image)
@@ -49,4 +56,15 @@ std::string ContainerImage::toString() const {
                        m_namespace.value_or("Unknown"),
                        m_repository.value_or("Unknown"),
                        m_tag.value_or("Unknown"));
+}
+
+nlohmann::json ContainerImage::toJSON() const {
+    nlohmann::json json{};
+
+    json["registry"] = m_registry;
+    json["namespace"] = m_namespace;
+    json["repository"] = m_repository;
+    json["tag"] = m_tag;
+
+    return json;
 }

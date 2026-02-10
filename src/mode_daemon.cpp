@@ -9,6 +9,7 @@
 
 #include <chrono>
 #include <condition_variable>
+#include <csignal>
 #include <format>
 #include <functional>
 #include <iostream>
@@ -16,7 +17,8 @@
 #include <mutex>
 #include <stop_token>
 #include <thread>
-#include <csignal>
+#include <utility>
+#include <vector>
 
 volatile static std::sig_atomic_t gSignalStatus;
 
@@ -112,8 +114,41 @@ void Daemon::watcherThread(std::stop_token stoken) {
             auto latest_tag = tag_filter.latest();
             if (latest_tag.has_value()) {
                 std::cout << "Latest tag: " << latest_tag.value().raw() << "\n";
+                {
+                    std::lock_guard lock{m_containers_mtx};
+                    std::pair<Container, Tag> entry{Container{container}, Tag{latest_tag.value()}};
+
+                    // erase existing container
+                    // ensures we only ever have the latest one
+                    for (auto it = m_containers.begin(); it != m_containers.end(); it++) {
+                        if (it->first == entry.first) {
+                            m_containers.erase(it);
+                            break;
+                        }
+                    }
+
+                    m_containers.push_back(std::move(entry));
+                }
             } else {
                 std::cout << "Could not find latest tag - No tags?\n";
+            }
+        }
+
+        // cleanup non-present containers
+        {
+            std::lock_guard lock{m_containers_mtx};
+            for (auto it = m_containers.begin(); it != m_containers.end(); it++) {
+                bool present{false};
+                for (auto& container : containers) {
+                    if (it->first == container) {
+                        present = true;
+                        break;
+                    }
+                }
+                if (!present) {
+                    std::cout << std::format("Removed container: {}\n", it->first.toString());
+                    m_containers.erase(it);
+                }
             }
         }
     }
@@ -124,9 +159,14 @@ void Daemon::watcherThread(std::stop_token stoken) {
 void Daemon::apiThread(std::stop_token stoken) {
     std::cout << std::format("HTTP API thread started (Serving from: http://{}:{})\n", m_config->listenAddr(), m_config->listenPort());
 
-    Api api{m_config};
+    Api api{this, m_config};
     std::stop_callback cb(stoken, [&api]{api.stop();});
     api.start();
 
     std::cout << "HTTP API thread stopped\n";
+}
+
+std::vector<std::pair<Container, Tag>> Daemon::getContainers() {
+    std::lock_guard lock{m_containers_mtx};
+    return m_containers;
 }

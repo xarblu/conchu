@@ -1,10 +1,16 @@
 #pragma once
 
+#include "container.hpp"
+#include "tag.hpp"
+
 #include <memory>
 #include <stop_token>
 #include <mutex>
 #include <condition_variable>
 #include <thread>
+#include <vector>
+#include <utility>
+#include <mutex>
 
 class Config;
 class ContainerEngine;
@@ -31,6 +37,12 @@ private:
     std::condition_variable m_watchCondition{};
     std::mutex m_watchMutex{};
 
+    /**
+     * Collected containers
+     */
+    std::vector<std::pair<Container, Tag>> m_containers{};
+    std::mutex m_containers_mtx{};
+
 public:
     explicit Daemon(std::shared_ptr<Config> config)
         : m_config{config}
@@ -45,6 +57,11 @@ public:
      * Shutdown daemon
      */
     void shutdown();
+
+    /**
+     * Get a copy of the current Container->Tag mappings
+     */
+    std::vector<std::pair<Container, Tag>> getContainers();
 
 private:
     /**

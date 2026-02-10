@@ -20,6 +20,10 @@ Tag::Tag(std::string_view tag) {
     }
 }
 
+bool Tag::operator==(const Tag& other) const {
+    return m_raw == other.raw();
+}
+
 std::strong_ordering Tag::operator <=>(const Tag &rhs) const {
     if (!versionComponents().empty() && !rhs.versionComponents().empty()) {
         return versionComponents() <=> rhs.versionComponents();

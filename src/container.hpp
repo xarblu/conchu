@@ -22,6 +22,11 @@ public:
     explicit Container(nlohmann::json &json);
 
     /**
+     * Compare this Container to other
+     */
+    bool operator==(const Container& other) const;
+
+    /**
      * Getters
      */
     std::optional<std::string> name() const {return m_name;}
@@ -32,6 +37,11 @@ public:
      * Convert Container to human readable string
      */
     std::string toString() const;
+
+    /**
+     * Convert Container to JSON
+     */
+    nlohmann::json toJSON() const;
 
 private:
     /**

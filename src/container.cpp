@@ -51,6 +51,12 @@ Container::Container(nlohmann::json &json) {
     }
 }
 
+bool Container::operator==(const Container& other) const{
+    return m_name == other.name() &&
+           m_image == other.image() &&
+           m_labels == other.labels();
+}
+
 void Container::printParseError(nlohmann::json &json, std::string_view msg) const {
     std::cerr << "Error parsing Container from JSON:\n"
               << json.dump(2)
@@ -70,4 +76,14 @@ std::string Container::toString() const {
                        m_name.value_or("Unknown"),
                        m_image.transform([](ContainerImage image) {return image.toString();}).value_or("Unknown"),
                        labels);
+}
+
+nlohmann::json Container::toJSON() const {
+    nlohmann::json json{};
+
+    json["name"] = m_name;
+    json["image"] = m_image.transform([](ContainerImage image){return image.toJSON();}).value_or(nlohmann::json{});
+    json["labels"] = m_labels;
+
+    return json;
 }

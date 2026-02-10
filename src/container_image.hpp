@@ -1,5 +1,7 @@
 #pragma once
 
+#include <nlohmann/json.hpp>
+
 #include <string>
 #include <string_view>
 #include <optional>
@@ -15,9 +17,19 @@ private:
 
 public:
     /**
+     * Empty container image
+     */
+    explicit ContainerImage() {}
+
+    /**
      * Parse a container image source
      */
     explicit ContainerImage(std::string_view image);
+
+    /**
+     * Compare this ContainerImage to other
+     */
+    bool operator==(const ContainerImage& other) const;
 
     /**
      * Getters
@@ -36,6 +48,11 @@ public:
      * Convert to human readable string
      */
     std::string toString() const;
+
+    /**
+     * Convert Container to JSON
+     */
+    nlohmann::json toJSON() const;
 
 private:
     /**
